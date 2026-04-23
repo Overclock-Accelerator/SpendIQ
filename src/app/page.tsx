@@ -12,9 +12,10 @@ import { SavingsPanel } from "@/components/SavingsPanel";
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("claude-sonnet");
+  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-6");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showRawJSON, setShowRawJSON] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -109,7 +110,17 @@ export default function Home() {
             AI Expense Analyzer
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowRawJSON(!showRawJSON)}
+            className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              showRawJSON
+                ? "bg-gray-800 text-white"
+                : "border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600"
+            }`}
+          >
+            {showRawJSON ? "{ } Raw JSON ON" : "{ } Raw JSON"}
+          </button>
           <label htmlFor="model" className="text-xs font-medium text-gray-400">
             Model
           </label>
@@ -181,6 +192,22 @@ export default function Home() {
                     <div className="rounded-2xl bg-white px-4 py-3 text-sm leading-relaxed text-gray-700 shadow-sm ring-1 ring-gray-100">
                       {msg.content}
                     </div>
+                    {/* Raw JSON view */}
+                    {showRawJSON && (
+                      <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+                        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-2">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                            Raw AI Response (JSON)
+                          </span>
+                          <span className="text-[10px] text-gray-600">
+                            This is the structured data powering the UI below
+                          </span>
+                        </div>
+                        <pre className="max-h-80 overflow-auto p-4 text-xs leading-relaxed text-emerald-400">
+                          {JSON.stringify(msg.analysis, null, 2)}
+                        </pre>
+                      </div>
+                    )}
                     {/* Rich UI components */}
                     <SummaryCards analysis={msg.analysis} />
                     <div className="grid grid-cols-3 gap-4">
