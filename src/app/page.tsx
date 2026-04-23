@@ -83,8 +83,8 @@ export default function Home() {
   );
 
   const handleLoadSample = useCallback(() => {
-    analyzeExpenses(SAMPLE_CSV, true);
-  }, [analyzeExpenses]);
+    setInput(SAMPLE_CSV);
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
