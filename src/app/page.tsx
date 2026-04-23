@@ -27,7 +27,7 @@ export default function Home() {
     async (content: string, isCSV: boolean) => {
       const userMessage: ChatMessage = {
         role: "user",
-        content: isCSV ? `[Uploaded CSV — ${content.split("\n").length - 1} transactions]` : content,
+        content: content,
         isCSV,
       };
       setMessages((prev) => [...prev, userMessage]);
@@ -182,8 +182,19 @@ export default function Home() {
               <div key={i}>
                 {msg.role === "user" ? (
                   <div className="flex justify-end">
-                    <div className="max-w-[70%] rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm text-white">
-                      {msg.content}
+                    <div className={`rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm text-white ${msg.isCSV ? "max-w-[90%]" : "max-w-[70%]"}`}>
+                      {msg.isCSV ? (
+                        <div>
+                          <p className="mb-2 text-xs font-medium text-emerald-200">
+                            CSV Data ({msg.content.split("\n").length - 1} transactions)
+                          </p>
+                          <pre className="max-h-48 overflow-auto whitespace-pre text-xs leading-relaxed text-emerald-100 font-mono">
+                            {msg.content}
+                          </pre>
+                        </div>
+                      ) : (
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                      )}
                     </div>
                   </div>
                 ) : msg.analysis ? (
