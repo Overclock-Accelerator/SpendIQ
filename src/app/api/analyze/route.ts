@@ -23,14 +23,12 @@ export async function POST(request: NextRequest) {
 
     let analysis;
     try {
-      let raw = result.content.trim();
-      if (raw.startsWith("```")) {
-        raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-      }
-      analysis = JSON.parse(raw);
-    } catch {
+      analysis = extractJsonObject(result.content);
+    } catch (err) {
       return Response.json(
-        { error: "Failed to parse analysis. Please try again." },
+        {
+          error: `Failed to parse analysis: ${err instanceof Error ? err.message : "Unknown error"}`,
+        },
         { status: 500 }
       );
     }
@@ -41,4 +39,67 @@ export async function POST(request: NextRequest) {
       error instanceof Error ? error.message : "Unknown error occurred";
     return Response.json({ error: message }, { status: 500 });
   }
+}
+
+function extractJsonObject<T = unknown>(raw: string): T {
+  let s = raw.trim();
+
+  // Strip code fences
+  if (s.startsWith("```")) {
+    s = s
+      .replace(/^```(?:json|JSON)?\s*/i, "")
+      .replace(/```[\s\S]*$/, "")
+      .trim();
+  }
+
+  // Fast path
+  if (s.startsWith("{")) {
+    try {
+      return JSON.parse(s) as T;
+    } catch {
+      // fall through to bracket scan
+    }
+  }
+
+  // Find first { and its matching }
+  const start = s.indexOf("{");
+  if (start === -1) {
+    throw new Error(
+      `No JSON object found. First 200 chars: ${s.slice(0, 200)}`
+    );
+  }
+
+  let depth = 0;
+  let inString = false;
+  let stringChar = "";
+  let escape = false;
+  for (let i = start; i < s.length; i++) {
+    const ch = s[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (inString) {
+      if (ch === "\\") {
+        escape = true;
+        continue;
+      }
+      if (ch === stringChar) inString = false;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      inString = true;
+      stringChar = ch;
+      continue;
+    }
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        return JSON.parse(s.slice(start, i + 1)) as T;
+      }
+    }
+  }
+
+  throw new Error("Unterminated JSON in response (likely truncated)");
 }
