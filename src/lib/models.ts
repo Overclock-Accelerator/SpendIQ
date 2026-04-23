@@ -5,13 +5,13 @@ export const AI_MODELS: AIModel[] = [
     id: "claude-sonnet",
     name: "Claude Sonnet 4.6",
     provider: "anthropic",
-    modelId: "claude-sonnet-4-6-20250514",
+    modelId: "claude-sonnet-4-6",
   },
   {
     id: "claude-haiku",
     name: "Claude Haiku 4.5",
     provider: "anthropic",
-    modelId: "claude-haiku-4-5-20241022",
+    modelId: "claude-haiku-4-5",
   },
   {
     id: "gpt-4o",
