@@ -22,7 +22,15 @@ export const ANALYZE_SYSTEM_PROMPT = `You are a personal finance analyst. The us
     }
   ],
   "subscriptions": [
-    // Same shape as expenses, but only recurring items
+    {
+      "description": "Subscription description",
+      "amount": 9.99,
+      "date": "2026-03-15",
+      "category": "Subscriptions",
+      "isRecurring": true,
+      "flag": "cuttable" | null,
+      "flagReason": "Why this is flagged, or null"
+    }
   ],
   "savingsOpportunities": [
     {
